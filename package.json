@@ -1,7 +1,7 @@
 {
   "name": "pino-transport-rotating",
   "description": "Plugin for pino to transport logs to rotating files",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "author": {
     "name": "Mohammad Abu Mattar",
