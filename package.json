@@ -1,0 +1,67 @@
+{
+  "name": "pino-transport-rotating",
+  "description": "Plugin for pino to transport logs to rotating files",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Abu Mattar",
+    "email": "mohammad.khaled@outlook.com",
+    "url": "https://mkabumattar.github.io/"
+  },
+  "homepage": "https://github.com/MKAbuMattar/pino-transport-rotating#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MKAbuMattar/pino-transport-rotating.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MKAbuMattar/pino-transport-rotating/issues"
+  },
+  "scripts": {
+    "build:rollup": "rollup -c rollup.config.mjs",
+    "build": "rimraf lib && npm run build:rollup && rimraf lib/types",
+    "lint": "biome check ./src",
+    "lint:fix": "biome check ./src --fix",
+    "fmt": "biome format ./src",
+    "fmt:fix": "biome format --write ./src"
+  },
+  "dependencies": {
+    "pino": "9.4.0",
+    "pino-pretty": "11.2.2",
+    "rotating-file-stream": "3.2.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.3",
+    "@rollup/plugin-terser": "0.4.4",
+    "@rollup/plugin-typescript": "12.1.0",
+    "@types/cors": "2.8.17",
+    "@types/node": "22.7.5",
+    "@vitest/coverage-v8": "2.1.2",
+    "rimraf": "6.0.1",
+    "rollup": "4.24.0",
+    "terser": "5.34.1",
+    "tslib": "2.7.0",
+    "typescript": "5.6.3"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "import": "./lib/index.mjs",
+      "types": "./index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "./lib/index.d.ts",
+    "./lib/index.js",
+    "./lib/index.js.map",
+    "./lib/index.mjs",
+    "./lib/index.mjs.map",
+    "./index.d.ts"
+  ],
+  "support": {
+    "backing": {
+      "npm-funding": true
+    }
+  }
+}
