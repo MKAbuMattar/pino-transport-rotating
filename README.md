@@ -35,7 +35,7 @@ const loggerOptions: LoggerOptions = {
       },
       {
         level: "info",
-        target: "pino-transport-rotating-file",
+        target: "pino-transport-rotating",
         options: {
           dir: path.join(process.cwd(), "logs"),
           filename: "all",
@@ -48,7 +48,7 @@ const loggerOptions: LoggerOptions = {
       },
       {
         level: "error",
-        target: "pino-transport-rotating-file",
+        target: "pino-transport-rotating",
         options: {
           dir: path.join(process.cwd(), "logs"),
           filename: "error",
@@ -113,4 +113,3 @@ The log files are rotated based on the following parameters:
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
-# pino-transport-rotating
