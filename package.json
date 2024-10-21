@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "pino": "9.5.0",
-    "pino-pretty": "11.2.2",
+    "pino-pretty": "11.3.0",
     "rotating-file-stream": "3.2.5"
   },
   "devDependencies": {
