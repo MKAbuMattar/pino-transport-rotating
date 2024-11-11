@@ -1,13 +1,7 @@
 {
   "name": "pino-transport-rotating",
   "description": "Plugin for pino to transport logs to rotating files",
-  "keywords": [
-    "pino",
-    "transport",
-    "rotating",
-    "file",
-    "log"
-  ],
+  "keywords": ["pino", "transport", "rotating", "file", "log"],
   "version": "1.0.2",
   "license": "MIT",
   "author": {
