@@ -40,7 +40,7 @@ const loggerOptions: LoggerOptions = {
           dir: path.join(process.cwd(), "logs"),
           filename: "all",
           enabled: true,
-          size: "1M",
+          size: "100K",
           interval: "1d",
           compress: "gzip",
           immutable: true,
@@ -53,7 +53,7 @@ const loggerOptions: LoggerOptions = {
           dir: path.join(process.cwd(), "logs"),
           filename: "error",
           enabled: true,
-          size: "1M",
+          size: "100K",
           interval: "1d",
           compress: "gzip",
           immutable: true,
@@ -76,7 +76,7 @@ The plugin accepts the following options:
 - `dir` (string, required): The directory where the log files will be saved.
 - `filename` (string, optional): The base name of the log file. Defaults to `app.log`.
 - `enabled` (boolean, optional): If `false`, logging is disabled. Defaults to `true`.
-- `size` (string, optional): The size at which to rotate the log files. Defaults to `'1M'`.
+- `size` (string, optional): The size at which to rotate the log files. Defaults to `'100K'`.
 - `interval` (string, optional): The interval at which to rotate the log files. Defaults to `'1d'`.
 - `compress` (string, optional): The compression method to use for rotated files. Defaults to `'gzip'`.
 - `immutable` (boolean, optional): Whether to apply immutability to the rotated files. Defaults to `true`.
@@ -88,7 +88,7 @@ The plugin accepts the following options:
   dir: '/var/log/app',
   filename: 'app',
   enabled: true,
-  size: '1M',
+  size: '100K',
   interval: '1d',
   compress: 'gzip',
   immutable: true,
@@ -99,7 +99,7 @@ The plugin accepts the following options:
 
 The log files are rotated based on the following parameters:
 
-- **Size**: `10 MegaBytes (1M)` - Log files are rotated when they reach this size (configurable).
+- **Size**: `100 KB (100K)` - Log files are rotated when they reach 100 KB in size (configurable).
 - **Interval**: `1 day (1d)` - Log files are rotated daily (configurable).
 - **Compression**: `gzip` - Rotated files are compressed using gzip (configurable).
 - **Filename Pattern**: `${filename}-${date}.${index}.log` - Log files are named based on the provided filename, date, and index.

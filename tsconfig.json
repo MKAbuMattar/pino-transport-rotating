@@ -14,7 +14,9 @@
     "strict": true,
     "noPropertyAccessFromIndexSignature": false,
     "skipLibCheck": true,
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
+    "removeComments": false,
+    "declaration": false
   },
   "extends": [],
   "exclude": ["node_modules"],
