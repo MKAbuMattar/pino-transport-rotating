@@ -1,4 +1,3 @@
-import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 
 export default [
@@ -8,9 +7,11 @@ export default [
       'pino-abstract-transport',
       'pino-pretty',
       'rotating-file-stream',
+      'node:buffer',
+      'node:path',
+      'node:stream',
     ],
     plugins: [
-      terser(),
       typescript({
         tsconfig: 'tsconfig.json',
         declaration: true,
@@ -24,6 +25,7 @@ export default [
         name: 'PinoTransportRotating',
         format: 'cjs',
         sourcemap: true,
+        exports: 'named',
       },
       {
         file: 'lib/index.mjs',

@@ -109,6 +109,9 @@
       "fileMatch": ["package.json", "tsup.config.json"]
     }
   ],
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
   }
