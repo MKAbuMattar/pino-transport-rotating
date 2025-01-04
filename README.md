@@ -1,5 +1,27 @@
 # Pino Plugin - Rotating File Transport
 
+<div align="center">
+  <a href="https://www.npmjs.com/package/pino-transport-rotating/v/latest" target="_blank" rel="noreferrer">
+    <img src="https://img.shields.io/npm/v/pino-transport-rotating/latest?style=for-the-badge&logo=npm&logoColor=white&color=d52128" alt="Latest NPM Version"/>
+  </a>
+
+  <a href="https://github.com/MKAbuMattar/pino-transport-rotating" target="_blank" rel="noreferrer">
+    <img src="https://img.shields.io/badge/github-%23181717.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository"/>
+  </a>
+
+  <a href="https://github.com/MKAbuMattar/pino-transport-rotating/releases" target="_blank" rel="noreferrer">
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/MKAbuMattar/pino-transport-rotating?color=%23d52128&label=Latest%20release&style=for-the-badge" />
+  </a>
+
+  <a href="/LICENSE" target="_blank" rel="noreferrer">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/MKAbuMattar/pino-transport-rotating?color=%23d52128&style=for-the-badge">
+  </a>
+
+  <a href="https://github.com/MKAbuMattar/pino-transport-rotating/stargazers" target="_blank" rel="noreferrer">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/MKAbuMattar/pino-transport-rotating?color=%23d52128&label=GitHub%20Stars&style=for-the-badge">
+  </a>
+</div>
+
 This module provides a custom logging transport for the `pino` logger that uses rotating file streams to manage log files. It supports log file rotation based on size and time intervals, and it can be configured to include log file compression.
 
 ## Features
