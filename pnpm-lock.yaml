@@ -15,8 +15,8 @@ importers:
         specifier: 13.0.0
         version: 13.0.0
       rotating-file-stream:
-        specifier: 3.2.5
-        version: 3.2.5
+        specifier: 3.2.6
+        version: 3.2.6
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -415,8 +415,8 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
-  rotating-file-stream@3.2.5:
-    resolution: {integrity: sha512-T8iBxUA4SookMTU97cIHUPck7beLOvN4g+y4db9E2eLn54OFsdp4qMnxuqmmJ05lcQHzueEVnPRykxfnPG948g==}
+  rotating-file-stream@3.2.6:
+    resolution: {integrity: sha512-r8yShzMWUvWXkRzbOXDM1fEaMpc3qo2PzK7bBH/0p0Nl/uz8Mud/Y+0XTQxe3kbSnDF7qBH2tSe83WDKA7o3ww==}
     engines: {node: '>=14.0'}
 
   safe-stable-stringify@2.5.0:
@@ -828,7 +828,7 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.34.6
       fsevents: 2.3.3
 
-  rotating-file-stream@3.2.5: {}
+  rotating-file-stream@3.2.6: {}
 
   safe-stable-stringify@2.5.0: {}
 
