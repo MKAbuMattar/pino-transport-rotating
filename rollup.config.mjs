@@ -4,12 +4,16 @@ export default [
   {
     input: 'src/index.ts',
     external: [
+      'node:buffer',
+      'node:fs',
+      'node:fs/promises',
+      'node:path',
+      'node:stream',
+      'node:util',
+      'node:zlib',
       'pino-abstract-transport',
       'pino-pretty',
       'rotating-file-stream',
-      'node:buffer',
-      'node:path',
-      'node:stream',
     ],
     plugins: [
       typescript({
