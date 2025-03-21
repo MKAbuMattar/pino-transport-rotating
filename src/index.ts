@@ -1,9 +1,19 @@
 import {Buffer} from 'node:buffer';
-import path from 'node:path';
+import {createReadStream, createWriteStream} from 'node:fs';
+import {access, stat, unlink} from 'node:fs/promises';
+import {join} from 'node:path';
 import {Transform, type TransformCallback, pipeline} from 'node:stream';
+import {promisify} from 'node:util';
+import {createGzip} from 'node:zlib';
 import build, {type OnUnknown} from 'pino-abstract-transport';
 import {prettyFactory} from 'pino-pretty';
 import {type RotatingFileStream, createStream} from 'rotating-file-stream';
+
+/**
+ * @constant {Function} pipelineAsync
+ * @description Promisified version of the Node.js pipeline function for handling streams.
+ */
+const pipelineAsync = promisify(pipeline);
 
 export type PinoTransportOptions = {
   dir: string;
@@ -11,40 +21,94 @@ export type PinoTransportOptions = {
   enabled: boolean;
   size: string;
   interval: string;
-  compress: string;
+  compress: boolean;
   immutable: boolean;
 };
 
 /**
- * @function pad
- * @description Pads a number to ensure it has at least two digits by adding a leading zero if necessary.
- * @param {number} num - The number to pad.
- * @returns {string} The padded string representation of the number.
- */
-export function pad(num: number): string {
-  return num.toString().padStart(2, '0');
-}
-
-/**
  * @function generator
  * @description Generates the file path for the rotating log file.
- * @param {number | Date | null} time - The current time (or null for the initial log file).
- * @param {number | undefined} index - The file index for rotation.
- * @param {string} dir - The directory to store log files.
- * @param {string} filename - The base filename for log files.
- * @throws Error if the time value is not a Date object.
- * @returns {string} The file path for the rotating log file.
+ *
+ * @param {number | Date | null} time - The time to use in the filename.
+ * @param {string} dir - The directory to store the log files.
+ * @param {string} filename - The base filename for the log files.
+ *
+ * @returns {string} The generated file path.
  */
-export function generator(
+function generator(
   time: number | Date | null,
-  index: number | undefined,
   dir: string,
   filename: string,
 ): string {
-  if (!time) return path.join(dir, `${filename}.log`);
+  if (!time) return join(dir, `${filename}.log`);
   const _date = new Date(time);
-  const date = `${_date.getFullYear()}-${pad(_date.getMonth() + 1)}-${pad(_date.getDate())}`;
-  return path.join(dir, `${filename}-${date}.${index}.log`);
+  const timestamp = _date.toISOString().replace(/[-:T]/g, '').split('.')[0];
+  return join(dir, `${filename}-${timestamp}.log`);
+}
+
+/**
+ * @function fileExists
+ * @description Checks if a file exists at the given path.
+ *
+ * @param {string} path - The path to the file.
+ *
+ * @returns {Promise<boolean>} A promise that resolves to true if the file exists, otherwise false.
+ */
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @function compressFile
+ * @description Compresses a file using gzip.
+ *
+ * @param {string} src - The path to the source file.
+ * @param {string} dest - The path to the destination file.
+ *
+ * @returns {Promise<void>} A promise that resolves when the file has been compressed.
+ */
+async function compressFile(src: string, dest: string): Promise<void> {
+  try {
+    const exists = await fileExists(src);
+    if (!exists) {
+      console.warn(`Skipping compression, file does not exist: ${src}`);
+      return;
+    }
+
+    const stats = await stat(src);
+    if (stats.isDirectory()) {
+      console.warn(`Skipping compression, source is a directory: ${src}`);
+      return;
+    }
+
+    await pipelineAsync(
+      createReadStream(src),
+      createGzip(),
+      createWriteStream(dest),
+    );
+
+    if (await fileExists(dest)) {
+      try {
+        await unlink(src);
+      } catch (unlinkError) {
+        if (
+          unlinkError instanceof Error &&
+          (unlinkError as any).code !== 'ENOENT'
+        ) {
+          console.error(`Error unlinking original file ${src}:`, unlinkError);
+        }
+      }
+    } else {
+      console.error(`Compression failed: Destination file ${dest} not found.`);
+    }
+  } catch (error) {
+    console.error(`Error compressing file ${src}:`, error);
+  }
 }
 
 /**
@@ -54,15 +118,17 @@ export function generator(
  * @property {boolean} enabled - Whether the transport is enabled.
  * @property {string} size - The maximum size of the log file before rotation.
  * @property {string} interval - The interval at which to rotate the log file.
- * @property {string} compress - The compression algorithm to use for rotated log files.
+ * @property {boolean} compress - Whether to compress rotated log files.
  * @property {boolean} immutable - Whether to use immutable logs.
  */
 
 /**
  * @function pinoTransportRotatingFile
- * @description Creates a Pino transport that writes logs to a rotating file.
- * @param {Partial<PinoTransportOptions>} options - The options for the transport.
- * @returns {Promise<Transform & OnUnknown>} The Pino transport that writes logs to a rotating file.
+ * @description Creates a Pino transport that writes logs to a rotating file, optionally compressing rotated files.
+ *
+ * @param {Partial<PinoTransportOptions>} options - The transport options.
+ *
+ * @returns {Promise<Transform & OnUnknown>} A promise that resolves to the transport stream.
  */
 export async function pinoTransportRotatingFile(
   options: Partial<PinoTransportOptions> = {
@@ -71,7 +137,7 @@ export async function pinoTransportRotatingFile(
     enabled: true,
     size: '100K',
     interval: '1d',
-    compress: 'gzip',
+    compress: true,
     immutable: true,
   },
 ): Promise<Transform & OnUnknown> {
@@ -81,22 +147,18 @@ export async function pinoTransportRotatingFile(
     enabled = true,
     size = '100K',
     interval = '1d',
-    compress = 'gzip',
+    compress = true,
     immutable = true,
   } = options;
 
   if (!enabled) {
-    const transform: Promise<Transform & OnUnknown> &
-      Transform &
-      OnUnknown &
-      Promise<Transform> = build((source) => source, {
+    return build((source) => source, {
       parse: 'lines',
+      expectPinoConfig: true,
       // @ts-expect-error
       enablePipelining: false,
       close() {},
-      expectPinoConfig: true,
     });
-    return transform;
   }
 
   if (!dir) {
@@ -104,14 +166,38 @@ export async function pinoTransportRotatingFile(
   }
 
   const rotatingStream: RotatingFileStream = createStream(
-    (time, index) => generator(time, index, dir, filename),
+    (time) => generator(time, dir, filename),
     {
       size,
       interval,
-      compress,
       immutable,
     },
   );
+
+  const compressedFiles = new Set<string>();
+
+  if (compress) {
+    rotatingStream.on('rotated', async (rotatedFile: string) => {
+      try {
+        if (compressedFiles.has(rotatedFile)) {
+          return;
+        }
+
+        const isFile = (await stat(rotatedFile)).isFile();
+        if (isFile) {
+          const compressedFile = `${rotatedFile}.gz`;
+          await compressFile(rotatedFile, compressedFile);
+          compressedFiles.add(rotatedFile);
+        } else {
+          console.warn(
+            `Skipping compression, rotated file is a directory: ${rotatedFile}`,
+          );
+        }
+      } catch (err) {
+        console.error(`Error compressing rotated file ${rotatedFile}:`, err);
+      }
+    });
+  }
 
   return build(
     (source: Transform & OnUnknown) => {
@@ -121,7 +207,7 @@ export async function pinoTransportRotatingFile(
         objectMode: true,
         autoDestroy: true,
         transform(
-          chunk: any,
+          chunk: string | Buffer<ArrayBufferLike> | ArrayBufferView,
           encoding: BufferEncoding,
           callback: TransformCallback,
         ) {
@@ -129,38 +215,29 @@ export async function pinoTransportRotatingFile(
             const logMessage = Buffer.isBuffer(chunk)
               ? chunk.toString(encoding)
               : chunk;
-
             const prettyLog = pretty(logMessage);
-
             callback(null, prettyLog);
           } catch (error: unknown) {
-            // Enhanced error handling
-            if (error instanceof Error) {
-              callback(error); // Pass the existing Error
-            } else if (typeof error === 'string') {
-              callback(new Error(error)); // Wrap the string in an Error
-            } else {
-              callback(new Error('An unknown error occurred')); // Generic Error for unexpected cases
-            }
+            callback(
+              error instanceof Error
+                ? error
+                : new Error(String(error) || 'An unknown error occurred'),
+            );
           }
         },
       });
 
-      pipeline(
-        source,
-        prettyStream,
-        rotatingStream,
-        (err: NodeJS.ErrnoException | null) => {
-          if (err) {
-            console.error('Failed to write log in transport:', err);
-          }
-        },
-      );
+      pipeline(source, prettyStream, rotatingStream, (err) => {
+        if (err) {
+          console.error('Failed to write log in transport:', err);
+        }
+      });
 
       return prettyStream;
     },
     {
       parse: 'lines',
+      expectPinoConfig: true,
       // @ts-expect-error
       enablePipelining: false,
       async close() {
@@ -168,7 +245,6 @@ export async function pinoTransportRotatingFile(
           rotatingStream.end(() => resolve());
         });
       },
-      expectPinoConfig: true,
     },
   );
 }

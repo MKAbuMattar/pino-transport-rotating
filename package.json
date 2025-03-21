@@ -33,9 +33,9 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@rollup/plugin-typescript": "12.1.2",
-    "@types/node": "22.13.8",
+    "@types/node": "22.13.11",
     "rimraf": "6.0.1",
-    "rollup": "4.34.9",
+    "rollup": "4.36.0",
     "tslib": "2.8.1",
     "typescript": "5.8.2"
   },

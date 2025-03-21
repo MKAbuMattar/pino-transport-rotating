@@ -34,6 +34,7 @@ This module provides a custom logging transport for the `pino` logger that uses 
 - **Interval**: Configurable time interval for log file rotation.
 - **Compression Method**: Configurable compression method for rotated log files.
 - **Immutability**: Option to apply immutability to rotated log files.
+- **Event Handling**: Emits a `rotated` event when a log file is rotated.
 
 ## Usage
 
@@ -64,7 +65,7 @@ const loggerOptions: LoggerOptions = {
           enabled: true,
           size: "100K",
           interval: "1d",
-          compress: "gzip",
+          compress: true,
           immutable: true,
         },
       },
@@ -77,7 +78,7 @@ const loggerOptions: LoggerOptions = {
           enabled: true,
           size: "100K",
           interval: "1d",
-          compress: "gzip",
+          compress: true,
           immutable: true,
         },
       },
@@ -96,11 +97,11 @@ logger.error("An error occurred");
 The plugin accepts the following options:
 
 - `dir` (string, required): The directory where the log files will be saved.
-- `filename` (string, optional): The base name of the log file. Defaults to `app.log`.
+- `filename` (string, optional): The base name of the log file. Defaults to `'app'`.
 - `enabled` (boolean, optional): If `false`, logging is disabled. Defaults to `true`.
 - `size` (string, optional): The size at which to rotate the log files. Defaults to `'100K'`.
 - `interval` (string, optional): The interval at which to rotate the log files. Defaults to `'1d'`.
-- `compress` (string, optional): The compression method to use for rotated files. Defaults to `'gzip'`.
+- `compress` (boolean, optional): Whether to compress rotated files. Defaults to `true`.
 - `immutable` (boolean, optional): Whether to apply immutability to the rotated files. Defaults to `true`.
 
 ### Example Configuration
@@ -112,7 +113,7 @@ The plugin accepts the following options:
   enabled: true,
   size: '100K',
   interval: '1d',
-  compress: 'gzip',
+  compress: true,
   immutable: true,
 }
 ```
@@ -124,13 +125,26 @@ The log files are rotated based on the following parameters:
 - **Size**: `100 KB (100K)` - Log files are rotated when they reach 100 KB in size (configurable).
 - **Interval**: `1 day (1d)` - Log files are rotated daily (configurable).
 - **Compression**: `gzip` - Rotated files are compressed using gzip (configurable).
-- **Filename Pattern**: `${filename}-${date}.${index}.log` - Log files are named based on the provided filename, date, and index.
+- **Filename Pattern**: `${filename}-${timestamp}.log` - The rotated files are named using the `${filename}-${timestamp}.log` pattern.
+
+### Rotated Event
+
+The plugin emits a `rotated` event whenever a log file is rotated. This event can be used to perform additional actions, such as compressing the rotated file. For example:
+
+```typescript
+rotatingStream.on("rotated", async (rotatedFile) => {
+  console.log(`Log file rotated: ${rotatedFile}`);
+  // Additional actions, such as compression, can be performed here.
+});
+```
 
 ## Notes
 
 - Ensure that the directory specified in `dir` exists and is writable by the application.
 - The `enabled` option can be used to turn off logging without removing the transport configuration.
-- The `compress` option accepts various methods, but make sure the chosen method is supported by `rotating-file-stream`.
+- The `compress` option, when enabled, compresses rotated files into `.gz` format and deletes the original file after successful compression.
+- The `immutable` option ensures that rotated files are not modified after creation.
+- The `rotated` event provides a hook for custom post-rotation actions, such as archiving or uploading rotated files.
 
 ## License
 
